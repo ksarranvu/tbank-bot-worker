@@ -59,8 +59,10 @@
     <div class="card">
       <div class="card-title">💡 Как использовать</div>
       <ul class="card-text">
-        <li>Покажи QR человеку</li><li>Или отправь ссылку</li>
-        <li>Человек запускает основного бота</li><li>Оформляет продукт по ссылке</li>
+        <li>Покажи QR человеку</li>
+        <li>Или отправь ссылку</li>
+        <li>Человек запускает основного бота</li>
+        <li>Оформляет продукт по ссылке</li>
       </ul>
     </div>
   </div>
@@ -81,8 +83,11 @@
     <div class="card">
       <div class="card-title">🔄 Как всё работает</div>
       <ul class="card-text">
-        <li>Получаешь свой QR</li><li>Человек сканирует</li><li>Попадает в основного бота</li>
-        <li>Оформляет продукт</li><li>Система считает его за тобой</li>
+        <li>Получаешь свой QR</li>
+        <li>Человек сканирует</li>
+        <li>Попадает в основного бота</li>
+        <li>Оформляет продукт</li>
+        <li>Система считает его за тобой</li>
       </ul>
     </div>
   </div>
@@ -91,8 +96,10 @@
     <div class="card">
       <div class="card-title">⚠️ Правила</div>
       <ul class="card-text">
-        <li>Только свой QR</li><li>Не передавай QR другим сотрудникам</li>
-        <li>Оформление по ссылке из бота</li><li>Нужны условия банка</li>
+        <li>Только свой QR</li>
+        <li>Не передавай QR другим сотрудникам</li>
+        <li>Оформление по ссылке из бота</li>
+        <li>Нужны условия банка</li>
       </ul>
     </div>
     <div class="warning"><b>Важно:</b> зачёт только после выполнения условий акции.</div>
@@ -118,7 +125,7 @@
 </div>
 
 <script>
-  const STAFF_API = "https://ТВОЙ-ДОМЕН-STAFF.up.railway.app"; // ← ЗАМЕНИ
+  const STAFF_API = "https://tbank-bot-worker-production.up.railway.app";
   const API_KEY = "LOX22899";
   const OWNER_ID = 8896790430;
 
@@ -151,7 +158,7 @@
       document.getElementById('myTotal').textContent = data.total ?? 0;
       document.getElementById('myCompleted').textContent = data.completed ?? 0;
     } catch(e) {
-      err.textContent = 'Не удалось загрузить. Проверь STAFF_API.';
+      err.textContent = 'Не удалось загрузить. Проверь, что staff-бот с API задеплоен.';
     }
   }
 
@@ -164,8 +171,8 @@
       const list = data.staff || [];
       document.getElementById('staffAdminList').innerHTML = list.length ? list.map(s => `
         <div class="user-row">
-          <b>${s.full_name||'Без имени'}</b><br>
-          <span class="muted">ID: ${s.user_id} · @${s.username||'нет'}</span><br>
+          <b>${s.full_name || 'Без имени'}</b><br>
+          <span class="muted">ID: ${s.user_id} · @${s.username || 'нет'}</span><br>
           <span class="muted">Приведено: ${s.total} · Выполнили: ${s.completed}</span>
         </div>`).join('') : 'Пока нет сотрудников';
     } catch(e) {
