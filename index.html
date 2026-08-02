@@ -8,11 +8,7 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Inter', -apple-system, sans-serif;
@@ -29,7 +25,6 @@
       padding: 16px 14px;
     }
 
-    /* ===== HEADER ===== */
     .header {
       text-align: center;
       padding: 10px 0 20px;
@@ -61,22 +56,18 @@
       font-size: 13.5px;
     }
 
-    /* ===== TABS CONTENT ===== */
     .tab-content {
       display: none;
       animation: fade 0.25s ease;
     }
 
-    .tab-content.active {
-      display: block;
-    }
+    .tab-content.active { display: block; }
 
     @keyframes fade {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ===== CARDS ===== */
     .card {
       background: linear-gradient(145deg, #1a1a1a, #131313);
       border: 1px solid #2a2a2a;
@@ -115,7 +106,6 @@
       font-weight: 700;
     }
 
-    /* ===== BUTTONS ===== */
     .btn {
       display: block;
       width: 100%;
@@ -128,13 +118,11 @@
       font-weight: 700;
       text-align: center;
       text-decoration: none;
-      margin-top: 14px;
+      margin-top: 12px;
       box-shadow: 0 4px 18px rgba(255, 221, 45, 0.25);
     }
 
-    .btn:active {
-      transform: scale(0.97);
-    }
+    .btn:active { transform: scale(0.97); }
 
     .btn-outline {
       background: transparent;
@@ -143,7 +131,13 @@
       box-shadow: none;
     }
 
-    /* ===== STATS ===== */
+    .btn-dark {
+      background: #222;
+      color: #fff;
+      box-shadow: none;
+      border: 1px solid #333;
+    }
+
     .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -160,7 +154,7 @@
     }
 
     .stat-number {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 800;
       color: #FFDD2D;
       margin-bottom: 4px;
@@ -171,7 +165,28 @@
       color: #888;
     }
 
-    /* ===== BOTTOM NAV ===== */
+    .warning {
+      background: #1a1608;
+      border: 1px solid #3d3200;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 13px;
+      color: #e8d48b;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    .admin-badge {
+      display: inline-block;
+      background: rgba(255, 221, 45, 0.15);
+      color: #FFDD2D;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -196,33 +211,18 @@
       background: none;
       border: none;
       cursor: pointer;
-      width: 70px;
+      width: 64px;
     }
 
-    .nav-item.active {
-      color: #FFDD2D;
-    }
+    .nav-item.active { color: #FFDD2D; }
+    .nav-icon { font-size: 20px; }
 
-    .nav-icon {
-      font-size: 20px;
-    }
-
-    .warning {
-      background: #1a1608;
-      border: 1px solid #3d3200;
-      border-radius: 16px;
-      padding: 14px;
-      font-size: 13px;
-      color: #e8d48b;
-      line-height: 1.5;
-      margin-top: 8px;
-    }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
   <div class="container">
 
-    <!-- HEADER -->
     <div class="header">
       <div class="logo">
         <img src="https://cdn.tbank.ru/static/pages/files/d39e9d26-fd5e-4574-9ad3-c3f2fc102598.png" alt="T-Bank">
@@ -231,17 +231,15 @@
       <p>Твой личный QR и статистика</p>
     </div>
 
-    <!-- TAB 1: QR -->
+    <!-- TAB: QR -->
     <div id="tab-qr" class="tab-content active">
       <div class="card">
         <div class="card-title">📲 Твой QR-код</div>
         <div class="card-text">
-          Нажми кнопку ниже — бот пришлёт тебе персональный QR-код.
-          Все люди, которые по нему перейдут, будут закреплены за тобой.
+          Нажми кнопку ниже — бот пришлёт персональный QR-код.
+          Все переходы по нему будут закреплены за тобой.
         </div>
-        <a class="btn" href="https://t.me/blackcard_staff_bot" target="_blank">
-          Получить мой QR-код
-        </a>
+        <a class="btn" href="https://t.me/blackcard_staff_bot" target="_blank">Получить мой QR-код</a>
       </div>
 
       <div class="card">
@@ -255,14 +253,13 @@
       </div>
     </div>
 
-    <!-- TAB 2: STATS -->
+    <!-- TAB: STATS -->
     <div id="tab-stats" class="tab-content">
       <div class="card">
         <div class="card-title">📊 Моя статистика</div>
         <div class="card-text" style="margin-bottom: 12px;">
-          Актуальные цифры всегда доступны в боте по кнопке «Моя статистика».
+          Актуальные цифры всегда доступны в боте.
         </div>
-
         <div class="stats-grid">
           <div class="stat-box">
             <div class="stat-number">—</div>
@@ -273,14 +270,11 @@
             <div class="stat-label">Выполнили</div>
           </div>
         </div>
-
-        <a class="btn btn-outline" href="https://t.me/blackcard_staff_bot" target="_blank" style="margin-top: 16px;">
-          Открыть статистику в боте
-        </a>
+        <a class="btn btn-outline" href="https://t.me/blackcard_staff_bot" target="_blank">Открыть статистику в боте</a>
       </div>
     </div>
 
-    <!-- TAB 3: HOW IT WORKS -->
+    <!-- TAB: HOW -->
     <div id="tab-how" class="tab-content">
       <div class="card">
         <div class="card-title">🔄 Как всё работает</div>
@@ -292,41 +286,70 @@
           <li>Система запоминает, что он пришёл от тебя</li>
         </ul>
       </div>
-
-      <div class="card">
-        <div class="card-title">🎯 Что считается</div>
-        <ul class="card-text">
-          <li>Переход по твоему QR</li>
-          <li>Запуск основного бота</li>
-          <li>Оформление продукта (после проверки)</li>
-        </ul>
-      </div>
     </div>
 
-    <!-- TAB 4: RULES -->
+    <!-- TAB: RULES -->
     <div id="tab-rules" class="tab-content">
       <div class="card">
         <div class="card-title">⚠️ Важные правила</div>
         <ul class="card-text">
           <li>Используй только свой QR-код</li>
-          <li>Не передавай свой QR другим сотрудникам</li>
+          <li>Не передавай свой QR другим</li>
           <li>Человек должен оформить продукт по ссылке из бота</li>
-          <li>Нужно выполнить условия банка (покупка/пополнение)</li>
+          <li>Нужно выполнить условия банка</li>
         </ul>
+      </div>
+      <div class="warning">
+        <b>Важно:</b> Зачёт происходит только если человек полностью выполнил условия акции банка.
+      </div>
+    </div>
+
+    <!-- TAB: ADMIN (только для владельца) -->
+    <div id="tab-admin" class="tab-content">
+      <div class="admin-badge">OWNER ACCESS</div>
+
+      <div class="card">
+        <div class="card-title">👑 Панель владельца</div>
+        <div class="card-text">
+          Здесь быстрый доступ к полной информации по сотрудникам и переходам.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 Отчёты</div>
+        <a class="btn btn-dark" href="https://t.me/blackcard_staff_bot?start=stats" target="_blank">
+          Общая статистика сотрудников
+        </a>
+        <a class="btn btn-dark" href="https://t.me/blackcard_tb_bot?start=admin" target="_blank">
+          Открыть основной бот (отчёты)
+        </a>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Команды в ботах</div>
+        <div class="card-text">
+          <b>В боте сотрудников:</b><br>
+          /stats — статистика по всем<br><br>
+          <b>В основном боте:</b><br>
+          /stats — общая статистика<br>
+          /users — список людей<br>
+          /user ID — человек подробно<br>
+          /staff — отчёт по сотрудникам
+        </div>
       </div>
 
       <div class="warning">
-        <b>Важно:</b> Бонус и зачёт прихода происходит только если человек полностью выполнил условия акции банка.
+        <b>Для тебя:</b> Живые цифры берутся из ботов. Мини-приложение даёт быстрый доступ к командам и панели управления.
       </div>
     </div>
 
   </div>
 
-  <!-- BOTTOM NAVIGATION -->
-  <div class="bottom-nav">
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav" id="bottomNav">
     <button class="nav-item active" onclick="showTab('qr')">
       <div class="nav-icon">📲</div>
-      <div>QR-код</div>
+      <div>QR</div>
     </button>
     <button class="nav-item" onclick="showTab('stats')">
       <div class="nav-icon">📊</div>
@@ -340,6 +363,11 @@
       <div class="nav-icon">⚠️</div>
       <div>Правила</div>
     </button>
+    <!-- Админ-кнопка (скрыта по умолчанию) -->
+    <button class="nav-item hidden" id="adminNavBtn" onclick="showTab('admin')">
+      <div class="nav-icon">👑</div>
+      <div>Админ</div>
+    </button>
   </div>
 
   <script>
@@ -349,18 +377,31 @@
     tg.setHeaderColor('#0b0b0b');
     tg.setBackgroundColor('#0b0b0b');
 
+    // Твой Telegram ID
+    const OWNER_ID = 8896790430;
+
+    // Проверяем, владелец ли открыл приложение
+    const user = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
+    const isOwner = user && user.id === OWNER_ID;
+
+    if (isOwner) {
+      document.getElementById('adminNavBtn').classList.remove('hidden');
+    }
+
     function showTab(tabName) {
-      // Скрываем все вкладки
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
-      // Показываем нужную
       document.getElementById('tab-' + tabName).classList.add('active');
 
-      // Подсвечиваем кнопку
-      const buttons = document.querySelectorAll('.nav-item');
-      const map = { qr: 0, stats: 1, how: 2, rules: 3 };
-      buttons[map[tabName]].classList.add('active');
+      // Подсветка кнопки
+      const buttons = [...document.querySelectorAll('.nav-item')].filter(b => !b.classList.contains('hidden'));
+      const names = isOwner
+        ? ['qr', 'stats', 'how', 'rules', 'admin']
+        : ['qr', 'stats', 'how', 'rules'];
+
+      const index = names.indexOf(tabName);
+      if (index >= 0) buttons[index].classList.add('active');
     }
   </script>
 </body>
