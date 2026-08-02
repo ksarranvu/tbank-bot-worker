@@ -10,7 +10,7 @@ import qrcode
 
 TOKEN = os.getenv("TOKEN")
 ADMIN_ID = 8896790430
-API_KEY = os.getenv("API_KEY", "supersecret123")
+API_KEY = os.getenv("API_KEY", "LOX22899")
 MAIN_BOT_USERNAME = "blackcard_tb_bot"
 
 bot = telebot.TeleBot(TOKEN)
@@ -71,6 +71,10 @@ def get_staff_stats(staff_id):
 
 init_db()
 
+@app.route("/")
+def home():
+    return "Staff bot API OK"
+
 @app.route("/api/my_stats")
 def api_my_stats():
     staff_id = request.args.get("user_id")
@@ -111,7 +115,7 @@ def start(message):
     save_staff(message.from_user)
     bot.send_message(
         message.chat.id,
-        "👋 <b>Бот для сотрудников</b>\n\nПолучи свой QR и смотри статистику.",
+        "👋 <b>Бот для сотрудников</b>\n\nПолучи QR и смотри статистику.",
         reply_markup=main_keyboard(),
         parse_mode="HTML"
     )
@@ -127,12 +131,7 @@ def generate_qr(message):
     bio = BytesIO()
     img.save(bio, "PNG")
     bio.seek(0)
-    bot.send_photo(
-        message.chat.id,
-        bio,
-        caption=f"📲 <b>Твой QR</b>\n\n<code>{link}</code>",
-        parse_mode="HTML"
-    )
+    bot.send_photo(message.chat.id, bio, caption=f"📲 <b>Твой QR</b>\n\n<code>{link}</code>", parse_mode="HTML")
 
 @bot.message_handler(func=lambda m: m.text == "📊 Моя статистика")
 def my_stats(message):
@@ -149,5 +148,5 @@ def run_api():
 
 if __name__ == "__main__":
     Thread(target=run_api, daemon=True).start()
-    print("✅ Staff-бот + API запущены")
+    print("✅ Staff-бот + Flask API")
     bot.infinity_polling()
