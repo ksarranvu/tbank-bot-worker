@@ -9,7 +9,10 @@ from aiogram.enums import ParseMode
 from dotenv import load_dotenv
 import os
 
-from database import init_db, add_employee, get_employee_stats, get_all_stats
+from database import (
+    init_db, add_employee, get_employee_stats, get_all_stats,
+    get_employee_name
+)
 
 load_dotenv()
 
@@ -36,6 +39,14 @@ def admin_kb():
         [InlineKeyboardButton(text="📈 Полный отчёт", callback_data="full_report")],
     ])
 
+# ========== Уведомления ==========
+
+async def notify_admin(text: str):
+    try:
+        await bot.send_message(ADMIN_ID, text, parse_mode=ParseMode.HTML)
+    except Exception as e:
+        logging.error(f"Не удалось отправить уведомление админу: {e}")
+
 # ========== Хендлеры ==========
 
 @dp.message(Command("start"))
@@ -45,8 +56,9 @@ async def cmd_start(message: types.Message):
 
     text = (
         f"<b>Привет, {user.first_name}!</b>\n\n"
-        "Это бот для сотрудников BlackCard.\n\n"
-        "Здесь ты можешь получить свой персональный QR-код и следить за статистикой."
+        "Это бот для сотрудников <b>BlackCard</b>.\n\n"
+        "Здесь ты можешь получить свой персональный QR-код "
+        "и отслеживать результаты."
     )
 
     kb = admin_kb() if user.id == ADMIN_ID else main_kb()
@@ -57,11 +69,10 @@ async def get_qr(callback: types.CallbackQuery):
     user_id = callback.from_user.id
     link = f"https://t.me/blackcard_tb_bot?start=ref_{user_id}"
 
-    # Генерация QR
     qr = qrcode.QRCode(version=1, box_size=10, border=2)
     qr.add_data(link)
     qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
+    img = qr.make_image(fill_color="#1a1a1a", back_color="white")
 
     bio = BytesIO()
     img.save(bio, "PNG")
@@ -71,8 +82,9 @@ async def get_qr(callback: types.CallbackQuery):
 
     text = (
         f"<b>Твой персональный QR-код</b>\n\n"
-        f"Ссылка: <code>{link}</code>\n\n"
-        "Отправляй этот QR людям. Когда они оформят продукт — тебе засчитается."
+        f"Ссылка:\n<code>{link}</code>\n\n"
+        "Отправляй этот QR людям.\n"
+        "Когда они оформят продукт — тебе засчитается."
     )
 
     await callback.message.answer_photo(photo, caption=text, parse_mode=ParseMode.HTML)
