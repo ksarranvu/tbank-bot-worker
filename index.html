@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Кабинет сотрудника</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0b0b0b;
+      color: #fff;
+      min-height: 100vh;
+      padding-bottom: 90px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 16px 14px;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      text-align: center;
+      padding: 10px 0 20px;
+    }
+
+    .logo {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 14px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 0 28px rgba(255, 221, 45, 0.4);
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .header h1 {
+      font-size: 21px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      color: #999;
+      font-size: 13.5px;
+    }
+
+    /* ===== TABS CONTENT ===== */
+    .tab-content {
+      display: none;
+      animation: fade 0.25s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: linear-gradient(145deg, #1a1a1a, #131313);
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-text {
+      color: #aaa;
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    .card-text li {
+      margin-bottom: 6px;
+      list-style: none;
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .card-text li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #FFDD2D;
+      font-weight: 700;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: block;
+      width: 100%;
+      background: #FFDD2D;
+      color: #111;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      margin-top: 14px;
+      box-shadow: 0 4px 18px rgba(255, 221, 45, 0.25);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid #FFDD2D;
+      color: #FFDD2D;
+      box-shadow: none;
+    }
+
+    /* ===== STATS ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .stat-box {
+      background: #161616;
+      border-radius: 16px;
+      padding: 16px 12px;
+      text-align: center;
+      border: 1px solid #2a2a2a;
+    }
+
+    .stat-number {
+      font-size: 24px;
+      font-weight: 800;
+      color: #FFDD2D;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #888;
+    }
+
+    /* ===== BOTTOM NAV ===== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #111;
+      border-top: 1px solid #222;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0 16px;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #666;
+      font-size: 11px;
+      font-weight: 500;
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 70px;
+    }
+
+    .nav-item.active {
+      color: #FFDD2D;
+    }
+
+    .nav-icon {
+      font-size: 20px;
+    }
+
+    .warning {
+      background: #1a1608;
+      border: 1px solid #3d3200;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 13px;
+      color: #e8d48b;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="logo">
+        <img src="https://cdn.tbank.ru/static/pages/files/d39e9d26-fd5e-4574-9ad3-c3f2fc102598.png" alt="T-Bank">
+      </div>
+      <h1>Кабинет сотрудника</h1>
+      <p>Твой личный QR и статистика</p>
+    </div>
+
+    <!-- TAB 1: QR -->
+    <div id="tab-qr" class="tab-content active">
+      <div class="card">
+        <div class="card-title">📲 Твой QR-код</div>
+        <div class="card-text">
+          Нажми кнопку ниже — бот пришлёт тебе персональный QR-код.
+          Все люди, которые по нему перейдут, будут закреплены за тобой.
+        </div>
+        <a class="btn" href="https://t.me/blackcard_staff_bot" target="_blank">
+          Получить мой QR-код
+        </a>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💡 Как использовать</div>
+        <ul class="card-text">
+          <li>Покажи QR человеку</li>
+          <li>Или отправь ссылку из бота</li>
+          <li>Человек запускает основного бота</li>
+          <li>Оформляет продукт по ссылке</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- TAB 2: STATS -->
+    <div id="tab-stats" class="tab-content">
+      <div class="card">
+        <div class="card-title">📊 Моя статистика</div>
+        <div class="card-text" style="margin-bottom: 12px;">
+          Актуальные цифры всегда доступны в боте по кнопке «Моя статистика».
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-number">—</div>
+            <div class="stat-label">Приведено</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">—</div>
+            <div class="stat-label">Выполнили</div>
+          </div>
+        </div>
+
+        <a class="btn btn-outline" href="https://t.me/blackcard_staff_bot" target="_blank" style="margin-top: 16px;">
+          Открыть статистику в боте
+        </a>
+      </div>
+    </div>
+
+    <!-- TAB 3: HOW IT WORKS -->
+    <div id="tab-how" class="tab-content">
+      <div class="card">
+        <div class="card-title">🔄 Как всё работает</div>
+        <ul class="card-text">
+          <li>Ты получаешь свой уникальный QR</li>
+          <li>Человек сканирует его</li>
+          <li>Попадает в основного бота</li>
+          <li>Оформляет продукт по ссылке</li>
+          <li>Система запоминает, что он пришёл от тебя</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎯 Что считается</div>
+        <ul class="card-text">
+          <li>Переход по твоему QR</li>
+          <li>Запуск основного бота</li>
+          <li>Оформление продукта (после проверки)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- TAB 4: RULES -->
+    <div id="tab-rules" class="tab-content">
+      <div class="card">
+        <div class="card-title">⚠️ Важные правила</div>
+        <ul class="card-text">
+          <li>Используй только свой QR-код</li>
+          <li>Не передавай свой QR другим сотрудникам</li>
+          <li>Человек должен оформить продукт по ссылке из бота</li>
+          <li>Нужно выполнить условия банка (покупка/пополнение)</li>
+        </ul>
+      </div>
+
+      <div class="warning">
+        <b>Важно:</b> Бонус и зачёт прихода происходит только если человек полностью выполнил условия акции банка.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="showTab('qr')">
+      <div class="nav-icon">📲</div>
+      <div>QR-код</div>
+    </button>
+    <button class="nav-item" onclick="showTab('stats')">
+      <div class="nav-icon">📊</div>
+      <div>Статистика</div>
+    </button>
+    <button class="nav-item" onclick="showTab('how')">
+      <div class="nav-icon">🔄</div>
+      <div>Как работает</div>
+    </button>
+    <button class="nav-item" onclick="showTab('rules')">
+      <div class="nav-icon">⚠️</div>
+      <div>Правила</div>
+    </button>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    tg.setHeaderColor('#0b0b0b');
+    tg.setBackgroundColor('#0b0b0b');
+
+    function showTab(tabName) {
+      // Скрываем все вкладки
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      // Показываем нужную
+      document.getElementById('tab-' + tabName).classList.add('active');
+
+      // Подсвечиваем кнопку
+      const buttons = document.querySelectorAll('.nav-item');
+      const map = { qr: 0, stats: 1, how: 2, rules: 3 };
+      buttons[map[tabName]].classList.add('active');
+    }
+  </script>
+</body>
+</html>
