@@ -6,6 +6,7 @@ from datetime import datetime
 from io import BytesIO
 from threading import Thread
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import qrcode
 
 TOKEN = os.getenv("TOKEN")
@@ -15,7 +16,9 @@ MAIN_BOT_USERNAME = "blackcard_tb_bot"  # основной бот без @
 
 bot = telebot.TeleBot(TOKEN)
 bot.delete_webhook()
+
 app = Flask(__name__)
+CORS(app)  # чтобы мини-приложение могло читать API
 
 def init_db():
     conn = sqlite3.connect("staff.db")
@@ -103,13 +106,17 @@ def api_my_stats():
     staff_id = request.args.get("user_id")
     if not staff_id:
         return jsonify({"error": "no user"}), 400
-    total, completed = get_staff_stats(int(staff_id))
+    try:
+        total, completed = get_staff_stats(int(staff_id))
+    except:
+        return jsonify({"error": "bad user_id"}), 400
     return jsonify({"total": total, "completed": completed})
 
 @app.route("/api/admin_stats")
 def api_admin_stats():
     if request.args.get("key") != API_KEY:
         return jsonify({"error": "forbidden"}), 403
+
     conn = sqlite3.connect("staff.db")
     cur = conn.cursor()
     cur.execute("SELECT user_id, username, full_name FROM staff")
@@ -180,5 +187,5 @@ def run_api():
 
 if __name__ == "__main__":
     Thread(target=run_api, daemon=True).start()
-    print("✅ Staff-бот + Flask API")
+    print("✅ Staff-бот + Flask API + CORS")
     bot.infinity_polling()
