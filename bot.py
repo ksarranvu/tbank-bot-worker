@@ -13,12 +13,13 @@ TOKEN = os.getenv("TOKEN")
 ADMIN_ID = 8896790430
 API_KEY = os.getenv("API_KEY", "LOX22899")
 MAIN_BOT_USERNAME = "blackcard_tb_bot"  # основной бот без @
+WEBAPP_URL = "https://ksarranvu.github.io/tbank-bot-worker/"  # ссылка на мини-приложение staff
 
 bot = telebot.TeleBot(TOKEN)
 bot.delete_webhook()
 
 app = Flask(__name__)
-CORS(app)  # чтобы мини-приложение могло читать API
+CORS(app)
 
 def init_db():
     conn = sqlite3.connect("staff.db")
@@ -91,7 +92,6 @@ def api_register():
 
     if not user_id:
         return jsonify({"error": "no user_id"}), 400
-
     try:
         user_id = int(user_id)
     except:
@@ -116,7 +116,6 @@ def api_my_stats():
 def api_admin_stats():
     if request.args.get("key") != API_KEY:
         return jsonify({"error": "forbidden"}), 403
-
     conn = sqlite3.connect("staff.db")
     cur = conn.cursor()
     cur.execute("SELECT user_id, username, full_name FROM staff")
@@ -134,25 +133,22 @@ def api_admin_stats():
     conn.close()
     return jsonify({"staff": result})
 
-# ===== BOT =====
+# ===== BOT UI =====
 def main_keyboard():
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     markup.add(types.KeyboardButton("📲 Получить мой QR-код"))
     markup.add(types.KeyboardButton("📊 Моя статистика"))
     return markup
 
-@bot.message_handler(commands=['start'])
-def start(message):
-    save_staff(message.from_user)
-    bot.send_message(
-        message.chat.id,
-        "👋 <b>Бот для сотрудников</b>\n\nПолучи QR и смотри статистику.",
-        reply_markup=main_keyboard(),
-        parse_mode="HTML"
-    )
+def webapp_keyboard():
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton(
+        text="📱 Открыть кабинет",
+        web_app=types.WebAppInfo(url=WEBAPP_URL)
+    ))
+    return markup
 
-@bot.message_handler(func=lambda m: m.text == "📲 Получить мой QR-код")
-def generate_qr(message):
+def send_qr_to_user(message):
     save_staff(message.from_user)
     link = f"https://t.me/{MAIN_BOT_USERNAME}?start=emp_{message.from_user.id}"
 
@@ -172,6 +168,36 @@ def generate_qr(message):
         parse_mode="HTML"
     )
 
+@bot.message_handler(commands=['start'])
+def start(message):
+    save_staff(message.from_user)
+
+    # из мини-приложения: ?start=qr
+    if message.text and "qr" in message.text.lower():
+        bot.send_message(
+            message.chat.id,
+            "Готовлю твой QR…",
+            reply_markup=main_keyboard()
+        )
+        send_qr_to_user(message)
+        return
+
+    bot.send_message(
+        message.chat.id,
+        "👋 <b>Бот для сотрудников</b>\n\nПолучи QR и смотри статистику.\nВыбирай действие 👇",
+        reply_markup=main_keyboard(),
+        parse_mode="HTML"
+    )
+    bot.send_message(
+        message.chat.id,
+        "Или открой мини-приложение:",
+        reply_markup=webapp_keyboard()
+    )
+
+@bot.message_handler(func=lambda m: m.text == "📲 Получить мой QR-код")
+def generate_qr(message):
+    send_qr_to_user(message)
+
 @bot.message_handler(func=lambda m: m.text == "📊 Моя статистика")
 def my_stats(message):
     total, completed = get_staff_stats(message.from_user.id)
@@ -187,5 +213,5 @@ def run_api():
 
 if __name__ == "__main__":
     Thread(target=run_api, daemon=True).start()
-    print("✅ Staff-бот + Flask API + CORS")
+    print("✅ Staff-бот + Flask + CORS")
     bot.infinity_polling()
