@@ -11,7 +11,7 @@ import qrcode
 TOKEN = os.getenv("TOKEN")
 ADMIN_ID = 8896790430
 API_KEY = os.getenv("API_KEY", "LOX22899")
-MAIN_BOT_USERNAME = "blackcard_tb_bot"
+MAIN_BOT_USERNAME = "blackcard_tb_bot"  # основной бот без @
 
 bot = telebot.TeleBot(TOKEN)
 bot.delete_webhook()
@@ -42,11 +42,9 @@ def init_db():
     conn.commit()
     conn.close()
 
-def save_staff(user):
+def save_staff_data(user_id, username="нет", full_name="Без имени"):
     conn = sqlite3.connect("staff.db")
     cur = conn.cursor()
-    full_name = f"{user.first_name or ''} {user.last_name or ''}".strip()
-    username = user.username or "нет"
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     cur.execute("""
         INSERT INTO staff (user_id, username, full_name, first_seen, last_seen)
@@ -55,9 +53,14 @@ def save_staff(user):
             username=excluded.username,
             full_name=excluded.full_name,
             last_seen=excluded.last_seen
-    """, (user.id, username, full_name, now, now))
+    """, (user_id, username, full_name, now, now))
     conn.commit()
     conn.close()
+
+def save_staff(user):
+    full_name = f"{user.first_name or ''} {user.last_name or ''}".strip() or "Без имени"
+    username = user.username or "нет"
+    save_staff_data(user.id, username, full_name)
 
 def get_staff_stats(staff_id):
     conn = sqlite3.connect("staff.db")
@@ -71,9 +74,29 @@ def get_staff_stats(staff_id):
 
 init_db()
 
+# ===== API =====
 @app.route("/")
 def home():
     return "Staff bot API OK"
+
+@app.route("/api/register", methods=["GET", "POST"])
+def api_register():
+    data = request.json if request.is_json else {}
+    user_id = request.args.get("user_id") or data.get("user_id")
+    username = request.args.get("username") or data.get("username") or "нет"
+    full_name = request.args.get("full_name") or data.get("full_name") or "Без имени"
+
+    if not user_id:
+        return jsonify({"error": "no user_id"}), 400
+
+    try:
+        user_id = int(user_id)
+    except:
+        return jsonify({"error": "bad user_id"}), 400
+
+    save_staff_data(user_id, username, full_name)
+    link = f"https://t.me/{MAIN_BOT_USERNAME}?start=emp_{user_id}"
+    return jsonify({"ok": True, "user_id": user_id, "link": link})
 
 @app.route("/api/my_stats")
 def api_my_stats():
@@ -104,6 +127,7 @@ def api_admin_stats():
     conn.close()
     return jsonify({"staff": result})
 
+# ===== BOT =====
 def main_keyboard():
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     markup.add(types.KeyboardButton("📲 Получить мой QR-код"))
@@ -124,14 +148,22 @@ def start(message):
 def generate_qr(message):
     save_staff(message.from_user)
     link = f"https://t.me/{MAIN_BOT_USERNAME}?start=emp_{message.from_user.id}"
+
     qr = qrcode.QRCode(version=1, box_size=10, border=2)
     qr.add_data(link)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
+
     bio = BytesIO()
     img.save(bio, "PNG")
     bio.seek(0)
-    bot.send_photo(message.chat.id, bio, caption=f"📲 <b>Твой QR</b>\n\n<code>{link}</code>", parse_mode="HTML")
+
+    bot.send_photo(
+        message.chat.id,
+        bio,
+        caption=f"📲 <b>Твой QR</b>\n\nЗакреплён за тобой.\n\n<code>{link}</code>",
+        parse_mode="HTML"
+    )
 
 @bot.message_handler(func=lambda m: m.text == "📊 Моя статистика")
 def my_stats(message):
