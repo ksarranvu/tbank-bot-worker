@@ -2,3 +2,4 @@ pyTelegramBotAPI
 qrcode
 Pillow
 Flask
+flask-cors
