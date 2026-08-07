@@ -9,22 +9,21 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:Inter,-apple-system,sans-serif;background:#0b0b0b;color:#fff;min-height:100vh;padding-bottom:90px}
+    body{font-family:Inter,-apple-system,sans-serif;background:#0b0b0b;color:#fff;min-height:100vh;padding-bottom:110px}
     .container{max-width:440px;margin:0 auto;padding:16px 14px}
     .header{text-align:center;padding:10px 0 20px}
     .logo{width:72px;height:72px;margin:0 auto 14px;border-radius:18px;overflow:hidden;box-shadow:0 0 28px rgba(255,221,45,.4)}
     .logo img{width:100%;height:100%;object-fit:cover}
     .header h1{font-size:21px;font-weight:800;margin-bottom:4px}
     .header p{color:#999;font-size:13.5px}
-    .tab-content{display:none;animation:fade .25s ease}
+    .tab-content{display:none}
     .tab-content.active{display:block}
-    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
     .card{background:linear-gradient(145deg,#1a1a1a,#131313);border:1px solid #2a2a2a;border-radius:20px;padding:18px;margin-bottom:12px}
     .card-title{font-size:16px;font-weight:700;margin-bottom:8px}
     .card-text{color:#aaa;font-size:13.5px;line-height:1.5}
     .card-text li{margin-bottom:6px;list-style:none;padding-left:16px;position:relative}
     .card-text li::before{content:"✓";position:absolute;left:0;color:#FFDD2D;font-weight:700}
-    .btn{display:block;width:100%;background:#FFDD2D;color:#111;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;text-align:center;text-decoration:none;margin-top:12px;box-shadow:0 4px 18px rgba(255,221,45,.25)}
+    .btn{display:block;width:100%;background:#FFDD2D;color:#111;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;text-align:center;margin-top:12px;box-shadow:0 4px 18px rgba(255,221,45,.25);cursor:pointer}
     .btn-outline{background:transparent;border:1.5px solid #FFDD2D;color:#FFDD2D;box-shadow:none}
     .btn-dark{background:#222;color:#fff;box-shadow:none;border:1px solid #333}
     .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
@@ -37,11 +36,11 @@
     .ok{color:#7DFFB3;font-size:13px;margin-top:8px}
     .admin-badge{display:inline-block;background:rgba(255,221,45,.15);color:#FFDD2D;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:12px}
     .warning{background:#1a1608;border:1px solid #3d3200;border-radius:16px;padding:14px;font-size:13px;color:#e8d48b;line-height:1.5;margin-top:8px}
-    .qr-wrap{display:flex;justify-content:center;margin:16px 0;padding:16px;background:#fff;border-radius:16px}
+    .qr-wrap{display:flex;justify-content:center;align-items:center;min-height:180px;margin:16px 0;padding:16px;background:#fff;border-radius:16px}
     .link-box{word-break:break-all;background:#161616;border:1px solid #2a2a2a;border-radius:12px;padding:12px;font-size:12px;color:#ccc;margin-top:10px}
     .hidden{display:none!important}
-    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:1px solid #222;display:flex;justify-content:space-around;padding:10px 0 16px;z-index:100}
-    .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;color:#666;font-size:11px;font-weight:500;background:none;border:none;width:64px}
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:1px solid #222;display:flex;justify-content:space-around;padding:10px 0 calc(16px + env(safe-area-inset-bottom));z-index:9999}
+    .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;color:#666;font-size:11px;font-weight:500;background:none;border:none;width:64px;cursor:pointer}
     .nav-item.active{color:#FFDD2D}
     .nav-icon{font-size:20px}
   </style>
@@ -57,14 +56,14 @@
   <div id="tab-qr" class="tab-content active">
     <div class="card">
       <div class="card-title">📲 Твой QR-код</div>
-      <div class="card-text">QR закреплён за твоим Telegram ID. Все переходы считаются твоими.</div>
-      <div id="qrcode" class="qr-wrap"></div>
+      <div class="card-text">QR закреплён за твоим Telegram ID.</div>
+      <div id="qrcode" class="qr-wrap"><span style="color:#999">Нажми «Сгенерировать»</span></div>
       <div id="qrLink" class="link-box hidden"></div>
       <div class="ok" id="qrOk"></div>
       <div class="error" id="qrError"></div>
-      <button class="btn" onclick="generateQR()">Сгенерировать / обновить QR</button>
-      <button class="btn btn-outline" onclick="copyLink()">Скопировать ссылку</button>
-      <button class="btn btn-dark" onclick="openBotChat()">Получить QR в чате бота</button>
+      <button class="btn" id="btnGen">Сгенерировать / обновить QR</button>
+      <button class="btn btn-outline" id="btnCopy">Скопировать ссылку</button>
+      <button class="btn btn-dark" id="btnChat">Получить QR в чате бота</button>
     </div>
     <div class="card">
       <div class="card-title">💡 Как использовать</div>
@@ -81,3 +80,248 @@
     <div class="card">
       <div class="card-title">📊 Моя статистика</div>
       <div class="stats-grid">
+        <div class="stat-box"><div class="stat-number" id="myTotal">—</div><div class="stat-label">Приведено</div></div>
+        <div class="stat-box"><div class="stat-number" id="myCompleted">—</div><div class="stat-label">Выполнили</div></div>
+      </div>
+      <button class="btn btn-outline" id="btnStats">Обновить</button>
+      <div class="error" id="myError"></div>
+    </div>
+  </div>
+
+  <div id="tab-how" class="tab-content">
+    <div class="card">
+      <div class="card-title">🔄 Как всё работает</div>
+      <ul class="card-text">
+        <li>QR привязан к твоему ID</li>
+        <li>Человек сканирует QR</li>
+        <li>Попадает в основного бота</li>
+        <li>Оформляет продукт</li>
+        <li>Переход считается за тобой</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="tab-rules" class="tab-content">
+    <div class="card">
+      <div class="card-title">⚠️ Правила</div>
+      <ul class="card-text">
+        <li>Только свой QR</li>
+        <li>Не передавай другим</li>
+        <li>Оформление по ссылке из бота</li>
+        <li>Нужны условия банка</li>
+      </ul>
+    </div>
+    <div class="warning"><b>Важно:</b> зачёт после выполнения условий акции.</div>
+  </div>
+
+  <div id="tab-admin" class="tab-content">
+    <div class="admin-badge">OWNER ACCESS</div>
+    <div class="card">
+      <div class="card-title">👑 Все сотрудники</div>
+      <button class="btn btn-dark" id="btnAdmin">Обновить отчёт</button>
+      <div class="error" id="staffError"></div>
+      <div id="staffAdminList" style="margin-top:12px" class="muted">Нажми «Обновить»</div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav" id="bottomNav">
+  <button class="nav-item active" data-tab="qr"><div class="nav-icon">📲</div><div>QR</div></button>
+  <button class="nav-item" data-tab="stats"><div class="nav-icon">📊</div><div>Статистика</div></button>
+  <button class="nav-item" data-tab="how"><div class="nav-icon">🔄</div><div>Как работает</div></button>
+  <button class="nav-item" data-tab="rules"><div class="nav-icon">⚠️</div><div>Правила</div></button>
+  <button class="nav-item hidden" id="adminNavBtn" data-tab="admin"><div class="nav-icon">👑</div><div>Админ</div></button>
+</div>
+
+<script>
+(function () {
+  const STAFF_API = "https://tbank-bot-worker-production.up.railway.app";
+  const API_KEY = "LOX22899";
+  const OWNER_ID = 8896790430;
+  const MAIN_BOT_USERNAME = "blackcard_tb_bot";
+  const STAFF_BOT_USERNAME = "blackcard_staff_bot";
+
+  const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (tg) {
+    tg.ready();
+    tg.expand();
+    try {
+      tg.setHeaderColor('#0b0b0b');
+      tg.setBackgroundColor('#0b0b0b');
+    } catch (e) {}
+  }
+
+  const user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
+  const isOwner = user && user.id === OWNER_ID;
+  if (isOwner) document.getElementById('adminNavBtn').classList.remove('hidden');
+
+  let currentLink = "";
+
+  function showTab(name) {
+    document.querySelectorAll('.tab-content').forEach(function (el) {
+      el.classList.remove('active');
+    });
+    document.querySelectorAll('.nav-item').forEach(function (el) {
+      el.classList.remove('active');
+    });
+
+    var tab = document.getElementById('tab-' + name);
+    if (tab) tab.classList.add('active');
+
+    document.querySelectorAll('.nav-item').forEach(function (btn) {
+      if (btn.getAttribute('data-tab') === name) btn.classList.add('active');
+    });
+
+    if (name === 'stats') loadMyStats();
+    if (name === 'admin' && isOwner) loadStaffAdmin();
+    if (name === 'qr') generateQR();
+  }
+
+  function generateQR() {
+    var err = document.getElementById('qrError');
+    var ok = document.getElementById('qrOk');
+    var box = document.getElementById('qrcode');
+    var linkBox = document.getElementById('qrLink');
+    err.textContent = '';
+    ok.textContent = '';
+    box.innerHTML = '';
+
+    if (!user) {
+      err.textContent = 'Открой мини-приложение из Telegram';
+      box.innerHTML = '<span style="color:#999">Нет данных пользователя</span>';
+      return;
+    }
+
+    currentLink = 'https://t.me/' + MAIN_BOT_USERNAME + '?start=emp_' + user.id;
+    linkBox.textContent = currentLink;
+    linkBox.classList.remove('hidden');
+
+    // Безопасная генерация QR
+    try {
+      if (typeof QRCode === 'undefined') {
+        box.innerHTML = '<span style="color:#333;font-size:12px;padding:10px;text-align:center">Библиотека QR не загрузилась.<br>Используй ссылку ниже или кнопку «В чате бота»</span>';
+      } else {
+        box.innerHTML = '';
+        new QRCode(box, {
+          text: currentLink,
+          width: 180,
+          height: 180,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+    } catch (e) {
+      box.innerHTML = '<span style="color:#333">Ошибка QR. Используй ссылку ниже.</span>';
+    }
+
+    // Регистрация в базе
+    var fullName = ((user.first_name || '') + ' ' + (user.last_name || '')).trim() || 'Без имени';
+    var username = user.username || 'нет';
+    fetch(STAFF_API + '/api/register?user_id=' + user.id +
+      '&username=' + encodeURIComponent(username) +
+      '&full_name=' + encodeURIComponent(fullName))
+      .then(function (r) { return r.json(); })
+      .then(function (reg) {
+        if (reg && reg.ok) {
+          ok.textContent = 'QR закреплён за ID ' + user.id;
+          if (reg.link) {
+            currentLink = reg.link;
+            linkBox.textContent = currentLink;
+          }
+        } else {
+          err.textContent = 'QR готов, регистрация не подтверждена';
+        }
+      })
+      .catch(function () {
+        err.textContent = 'QR готов. API регистрации временно недоступен.';
+      });
+  }
+
+  function copyLink() {
+    if (!currentLink) {
+      if (user) currentLink = 'https://t.me/' + MAIN_BOT_USERNAME + '?start=emp_' + user.id;
+      else return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(currentLink).then(function () {
+        if (tg && tg.showAlert) tg.showAlert('Ссылка скопирована');
+        else alert('Ссылка скопирована');
+      }).catch(function () {
+        if (tg && tg.showAlert) tg.showAlert(currentLink);
+        else alert(currentLink);
+      });
+    } else {
+      if (tg && tg.showAlert) tg.showAlert(currentLink);
+      else alert(currentLink);
+    }
+  }
+
+  function openBotChat() {
+    var link = 'https://t.me/' + STAFF_BOT_USERNAME + '?start=qr';
+    if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
+    else window.location.href = link;
+  }
+
+  function loadMyStats() {
+    var err = document.getElementById('myError');
+    err.textContent = '';
+    if (!user) {
+      err.textContent = 'Открой из Telegram';
+      return;
+    }
+    fetch(STAFF_API + '/api/my_stats?user_id=' + user.id)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        document.getElementById('myTotal').textContent = (data.total != null ? data.total : 0);
+        document.getElementById('myCompleted').textContent = (data.completed != null ? data.completed : 0);
+      })
+      .catch(function () {
+        err.textContent = 'Не удалось загрузить статистику';
+      });
+  }
+
+  function loadStaffAdmin() {
+    var err = document.getElementById('staffError');
+    err.textContent = '';
+    fetch(STAFF_API + '/api/admin_stats?key=' + API_KEY)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.error) throw new Error(data.error);
+        var list = data.staff || [];
+        var box = document.getElementById('staffAdminList');
+        if (!list.length) {
+          box.textContent = 'Пока нет сотрудников';
+          return;
+        }
+        box.innerHTML = list.map(function (s) {
+          return '<div class="user-row"><b>' + (s.full_name || 'Без имени') + '</b><br>' +
+            '<span class="muted">ID: ' + s.user_id + ' · @' + (s.username || 'нет') + '</span><br>' +
+            '<span class="muted">Приведено: ' + s.total + ' · Выполнили: ' + s.completed + '</span></div>';
+        }).join('');
+      })
+      .catch(function () {
+        err.textContent = 'Ошибка загрузки админ-отчёта';
+      });
+  }
+
+  // Навешиваем обработчики (надёжнее, чем onclick)
+  document.getElementById('btnGen').addEventListener('click', generateQR);
+  document.getElementById('btnCopy').addEventListener('click', copyLink);
+  document.getElementById('btnChat').addEventListener('click', openBotChat);
+  document.getElementById('btnStats').addEventListener('click', loadMyStats);
+  document.getElementById('btnAdmin').addEventListener('click', loadStaffAdmin);
+
+  document.querySelectorAll('.nav-item').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var name = btn.getAttribute('data-tab');
+      if (name) showTab(name);
+    });
+  });
+
+  // старт
+  generateQR();
+})();
+</script>
+</body>
+</html>
