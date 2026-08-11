@@ -9,6 +9,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import qrcode
 import urllib.request
+import urllib.parse
 import json
 
 TOKEN = os.getenv("TOKEN")
@@ -20,7 +21,6 @@ WEBAPP_URL = os.getenv("WEBAPP_URL", "https://ksarranvu.github.io/tbank-bot-work
 
 bot = telebot.TeleBot(TOKEN)
 bot.delete_webhook()
-
 app = Flask(__name__)
 CORS(app)
 
@@ -54,10 +54,29 @@ def save_staff_data(user_id, username="нет", full_name="Без имени"):
     conn.commit()
     conn.close()
 
+def register_in_main_bot(user_id, username, full_name):
+    """Регистрация сотрудника в основном боте"""
+    try:
+        qs = urllib.parse.urlencode({
+            "key": API_KEY,
+            "user_id": user_id,
+            "username": username,
+            "full_name": full_name
+        })
+        url = f"{MAIN_API}/api/register_staff?{qs}"
+        req = urllib.request.Request(url, headers={"User-Agent": "staff-bot"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode())
+    except Exception as e:
+        print("register_in_main_bot error:", e)
+        return None
+
 def save_staff(user):
     full_name = f"{user.first_name or ''} {user.last_name or ''}".strip() or "Без имени"
     username = user.username or "нет"
     save_staff_data(user.id, username, full_name)
+    # сразу в основной бот
+    register_in_main_bot(user.id, username, full_name)
 
 def fetch_main_staff_stats():
     try:
@@ -73,16 +92,16 @@ def fetch_main_staff_stats():
 def get_stats_for_staff(staff_id):
     staff_id = int(staff_id)
     for s in fetch_main_staff_stats():
-        if int(s.get("staff_id", 0)) == staff_id:
+        sid = int(s.get("staff_id") or s.get("user_id") or 0)
+        if sid == staff_id:
             return int(s.get("total", 0)), int(s.get("completed", 0))
     return 0, 0
 
 init_db()
 
-# ===== API =====
 @app.route("/")
 def home():
-    return "Staff bot API OK v2"
+    return "Staff bot API OK v3"
 
 @app.route("/api/register", methods=["GET", "POST"])
 def api_register():
@@ -90,7 +109,6 @@ def api_register():
     user_id = request.args.get("user_id") or data.get("user_id")
     username = request.args.get("username") or data.get("username") or "нет"
     full_name = request.args.get("full_name") or data.get("full_name") or "Без имени"
-
     if not user_id:
         return jsonify({"error": "no user_id"}), 400
     try:
@@ -99,15 +117,10 @@ def api_register():
         return jsonify({"error": "bad user_id"}), 400
 
     save_staff_data(user_id, username, full_name)
+    register_in_main_bot(user_id, username, full_name)
     link = f"https://t.me/{MAIN_BOT_USERNAME}?start=emp_{user_id}"
     total, completed = get_stats_for_staff(user_id)
-    return jsonify({
-        "ok": True,
-        "user_id": user_id,
-        "link": link,
-        "total": total,
-        "completed": completed
-    })
+    return jsonify({"ok": True, "user_id": user_id, "link": link, "total": total, "completed": completed})
 
 @app.route("/api/my_stats")
 def api_my_stats():
@@ -125,32 +138,21 @@ def api_admin_stats():
     if request.args.get("key") != API_KEY:
         return jsonify({"error": "forbidden"}), 403
 
-    conn = sqlite3.connect("staff.db")
-    cur = conn.cursor()
-    cur.execute("SELECT user_id, username, full_name FROM staff")
-    rows = cur.fetchall()
-    conn.close()
-
-    names = {r[0]: {"username": r[1], "full_name": r[2]} for r in rows}
-    main_stats = {int(s["staff_id"]): s for s in fetch_main_staff_stats()}
-    all_ids = set(names.keys()) | set(main_stats.keys())
-
+    # берём всё из основного бота (там уже сотрудники + цифры)
+    main_stats = fetch_main_staff_stats()
     result = []
-    for uid in all_ids:
-        st = main_stats.get(uid, {})
-        info = names.get(uid, {})
+    for s in main_stats:
+        uid = int(s.get("staff_id") or s.get("user_id") or 0)
         result.append({
             "user_id": uid,
-            "username": info.get("username", "нет"),
-            "full_name": info.get("full_name", f"ID {uid}"),
-            "total": int(st.get("total", 0)),
-            "completed": int(st.get("completed", 0))
+            "username": s.get("username", "нет"),
+            "full_name": s.get("full_name", f"ID {uid}"),
+            "total": int(s.get("total", 0)),
+            "completed": int(s.get("completed", 0))
         })
-
     result.sort(key=lambda x: x["total"], reverse=True)
     return jsonify({"staff": result})
 
-# ===== BOT =====
 def main_keyboard():
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     markup.add(types.KeyboardButton("📲 Получить мой QR-код"))
@@ -168,43 +170,35 @@ def webapp_keyboard():
 def send_qr_to_user(message):
     save_staff(message.from_user)
     link = f"https://t.me/{MAIN_BOT_USERNAME}?start=emp_{message.from_user.id}"
-
     qr = qrcode.QRCode(version=1, box_size=10, border=2)
     qr.add_data(link)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
-
     bio = BytesIO()
     img.save(bio, "PNG")
     bio.seek(0)
-
     bot.send_photo(
-        message.chat.id,
-        bio,
-        caption=f"📲 <b>Твой QR</b>\n\nЗакреплён за тобой.\n\n<code>{link}</code>",
+        message.chat.id, bio,
+        caption=f"📲 <b>Твой QR</b>\n\n<code>{link}</code>",
         parse_mode="HTML"
     )
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    save_staff(message.from_user)
+    save_staff(message.from_user)  # локально + в основной бот
 
     if message.text and "qr" in message.text.lower():
-        bot.send_message(message.chat.id, "Готовлю твой QR…", reply_markup=main_keyboard())
+        bot.send_message(message.chat.id, "Готовлю QR…", reply_markup=main_keyboard())
         send_qr_to_user(message)
         return
 
     bot.send_message(
         message.chat.id,
-        "👋 <b>Бот для сотрудников</b>\n\nПолучи QR и смотри статистику.",
+        "👋 <b>Бот для сотрудников</b>\n\nТы зарегистрирован как сотрудник.\nПолучи QR и смотри статистику.",
         reply_markup=main_keyboard(),
         parse_mode="HTML"
     )
-    bot.send_message(
-        message.chat.id,
-        "Или открой мини-приложение:",
-        reply_markup=webapp_keyboard()
-    )
+    bot.send_message(message.chat.id, "Мини-приложение:", reply_markup=webapp_keyboard())
 
 @bot.message_handler(func=lambda m: m.text == "📲 Получить мой QR-код")
 def generate_qr(message):
@@ -225,5 +219,5 @@ def run_api():
 
 if __name__ == "__main__":
     Thread(target=run_api, daemon=True).start()
-    print("✅ Staff bot v2 started")
+    print("✅ Staff bot v3")
     bot.infinity_polling()
