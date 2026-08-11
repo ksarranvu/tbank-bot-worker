@@ -60,10 +60,10 @@ def save_staff(user):
     save_staff_data(user.id, username, full_name)
 
 def fetch_main_staff_stats():
-    """Забираем реальные цифры из основного бота"""
     try:
         url = f"{MAIN_API}/api/staff?key={API_KEY}"
-        with urllib.request.urlopen(url, timeout=8) as resp:
+        req = urllib.request.Request(url, headers={"User-Agent": "staff-bot"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode())
             return data.get("staff", [])
     except Exception as e:
@@ -79,9 +79,10 @@ def get_stats_for_staff(staff_id):
 
 init_db()
 
+# ===== API =====
 @app.route("/")
 def home():
-    return "Staff bot API OK"
+    return "Staff bot API OK v2"
 
 @app.route("/api/register", methods=["GET", "POST"])
 def api_register():
@@ -89,6 +90,7 @@ def api_register():
     user_id = request.args.get("user_id") or data.get("user_id")
     username = request.args.get("username") or data.get("username") or "нет"
     full_name = request.args.get("full_name") or data.get("full_name") or "Без имени"
+
     if not user_id:
         return jsonify({"error": "no user_id"}), 400
     try:
@@ -123,7 +125,6 @@ def api_admin_stats():
     if request.args.get("key") != API_KEY:
         return jsonify({"error": "forbidden"}), 403
 
-    # имена из staff.db
     conn = sqlite3.connect("staff.db")
     cur = conn.cursor()
     cur.execute("SELECT user_id, username, full_name FROM staff")
@@ -132,9 +133,8 @@ def api_admin_stats():
 
     names = {r[0]: {"username": r[1], "full_name": r[2]} for r in rows}
     main_stats = {int(s["staff_id"]): s for s in fetch_main_staff_stats()}
-
-    # объединяем всех: и кто есть в staff, и кто есть только в main
     all_ids = set(names.keys()) | set(main_stats.keys())
+
     result = []
     for uid in all_ids:
         st = main_stats.get(uid, {})
@@ -150,6 +150,7 @@ def api_admin_stats():
     result.sort(key=lambda x: x["total"], reverse=True)
     return jsonify({"staff": result})
 
+# ===== BOT =====
 def main_keyboard():
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     markup.add(types.KeyboardButton("📲 Получить мой QR-код"))
@@ -172,6 +173,7 @@ def send_qr_to_user(message):
     qr.add_data(link)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
+
     bio = BytesIO()
     img.save(bio, "PNG")
     bio.seek(0)
@@ -186,6 +188,7 @@ def send_qr_to_user(message):
 @bot.message_handler(commands=['start'])
 def start(message):
     save_staff(message.from_user)
+
     if message.text and "qr" in message.text.lower():
         bot.send_message(message.chat.id, "Готовлю твой QR…", reply_markup=main_keyboard())
         send_qr_to_user(message)
@@ -197,7 +200,11 @@ def start(message):
         reply_markup=main_keyboard(),
         parse_mode="HTML"
     )
-    bot.send_message(message.chat.id, "Или открой мини-приложение:", reply_markup=webapp_keyboard())
+    bot.send_message(
+        message.chat.id,
+        "Или открой мини-приложение:",
+        reply_markup=webapp_keyboard()
+    )
 
 @bot.message_handler(func=lambda m: m.text == "📲 Получить мой QR-код")
 def generate_qr(message):
@@ -218,5 +225,5 @@ def run_api():
 
 if __name__ == "__main__":
     Thread(target=run_api, daemon=True).start()
-    print("✅ Staff-бот (статистика из основного бота)")
+    print("✅ Staff bot v2 started")
     bot.infinity_polling()
