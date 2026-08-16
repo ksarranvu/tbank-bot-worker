@@ -18,10 +18,13 @@
     }
     .container{max-width:440px;margin:0 auto;padding:16px 14px}
     .header{text-align:center;padding:10px 0 20px}
-    .logo{width:72px;height:72px;margin:0 auto 14px;border-radius:18px;overflow:hidden;box-shadow:0 0 28px rgba(255,221,45,.4)}
+    .logo{
+      width:72px;height:72px;margin:0 auto 14px;border-radius:18px;overflow:hidden;
+      box-shadow:0 0 28px rgba(255,255,255,.12);
+    }
     .logo img{width:100%;height:100%;object-fit:cover}
     .header h1{font-size:21px;font-weight:800;margin-bottom:4px}
-    .header p{color:#999;font-size:13.5px}
+    .header p{color:#888;font-size:13.5px}
     .tab-content{display:none}
     .tab-content.active{display:block}
     .card{
@@ -33,16 +36,35 @@
       box-shadow:0 4px 20px rgba(0,0,0,.45);
     }
     .card-title{font-size:16px;font-weight:700;margin-bottom:8px}
-    .card-text{color:#aaa;font-size:13.5px;line-height:1.5}
+    .card-text{color:#999;font-size:13.5px;line-height:1.5}
     .card-text li{margin-bottom:6px;list-style:none;padding-left:16px;position:relative}
-    .card-text li::before{content:"✓";position:absolute;left:0;color:#FFDD2D;font-weight:700}
-    .btn{display:block;width:100%;background:#FFDD2D;color:#111;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;text-align:center;margin-top:12px;box-shadow:0 4px 18px rgba(255,221,45,.25);cursor:pointer}
-    .btn-outline{background:transparent;border:1.5px solid #FFDD2D;color:#FFDD2D;box-shadow:none}
+    .card-text li::before{content:"✓";position:absolute;left:0;color:#ccc;font-weight:700}
+    .btn{
+      display:block;width:100%;
+      background:linear-gradient(145deg,#2e2e2e,#1a1a1a);
+      color:#fff;
+      border:1px solid #333;
+      border-radius:14px;
+      padding:15px;
+      font-size:15px;
+      font-weight:700;
+      text-align:center;
+      margin-top:12px;
+      box-shadow:0 4px 16px rgba(0,0,0,.4);
+      cursor:pointer;
+    }
+    .btn:active{background:linear-gradient(145deg,#252525,#141414)}
+    .btn-outline{
+      background:transparent;
+      border:1.5px solid #444;
+      color:#ddd;
+      box-shadow:none;
+    }
     .btn-dark{
-      background:linear-gradient(145deg,#2a2a2a,#151515);
+      background:linear-gradient(145deg,#222,#111);
       color:#fff;
       box-shadow:none;
-      border:1px solid #333;
+      border:1px solid #2a2a2a;
     }
     .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
     .stat-box{
@@ -52,8 +74,8 @@
       text-align:center;
       border:1px solid #252525;
     }
-    .stat-number{font-size:24px;font-weight:800;color:#FFDD2D;margin-bottom:4px}
-    .stat-label{font-size:12px;color:#888}
+    .stat-number{font-size:24px;font-weight:800;color:#fff;margin-bottom:4px}
+    .stat-label{font-size:12px;color:#777}
     .user-row{
       background:linear-gradient(145deg,#1a1a1a,#101010);
       border:1px solid #252525;
@@ -62,21 +84,35 @@
       margin-bottom:8px;
       font-size:13px;
     }
-    .muted{color:#888;font-size:12px}
+    .muted{color:#777;font-size:12px}
     .error{color:#ff6b6b;font-size:13px;margin-top:8px}
     .ok{color:#7DFFB3;font-size:13px;margin-top:8px}
-    .admin-badge{display:inline-block;background:rgba(255,221,45,.15);color:#FFDD2D;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:12px}
+    .admin-badge{
+      display:inline-block;
+      background:rgba(255,255,255,.08);
+      color:#ccc;
+      font-size:11px;
+      font-weight:700;
+      padding:4px 10px;
+      border-radius:20px;
+      margin-bottom:12px;
+      border:1px solid #333;
+    }
     .warning{
-      background:linear-gradient(145deg,#1a1608,#0f0c04);
-      border:1px solid #3d3200;
+      background:linear-gradient(145deg,#1a1a1a,#0f0f0f);
+      border:1px solid #333;
       border-radius:16px;
       padding:14px;
       font-size:13px;
-      color:#e8d48b;
+      color:#bbb;
       line-height:1.5;
       margin-top:8px;
     }
-    .qr-wrap{display:flex;justify-content:center;align-items:center;min-height:180px;margin:16px 0;padding:16px;background:#fff;border-radius:16px}
+    .qr-wrap{
+      display:flex;justify-content:center;align-items:center;
+      min-height:180px;margin:16px 0;padding:16px;
+      background:#fff;border-radius:16px;
+    }
     .link-box{
       word-break:break-all;
       background:linear-gradient(145deg,#1a1a1a,#0e0e0e);
@@ -84,25 +120,25 @@
       border-radius:12px;
       padding:12px;
       font-size:12px;
-      color:#ccc;
+      color:#bbb;
       margin-top:10px;
     }
     .hidden{display:none!important}
     .bottom-nav{
-      position:fixed;
-      bottom:0;
-      left:0;
-      right:0;
+      position:fixed;bottom:0;left:0;right:0;
       background:linear-gradient(180deg,#151515 0%,#0a0a0a 100%);
       border-top:1px solid #1f1f1f;
-      display:flex;
-      justify-content:space-around;
+      display:flex;justify-content:space-around;
       padding:10px 0 calc(16px + env(safe-area-inset-bottom));
       z-index:9999;
       box-shadow:0 -4px 20px rgba(0,0,0,.5);
     }
-    .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;color:#666;font-size:11px;font-weight:500;background:none;border:none;width:64px;cursor:pointer}
-    .nav-item.active{color:#FFDD2D}
+    .nav-item{
+      display:flex;flex-direction:column;align-items:center;gap:4px;
+      color:#555;font-size:11px;font-weight:500;
+      background:none;border:none;width:64px;cursor:pointer;
+    }
+    .nav-item.active{color:#fff}
     .nav-icon{font-size:20px}
   </style>
 </head>
@@ -257,7 +293,6 @@
     linkBox.textContent = currentLink;
     linkBox.classList.remove('hidden');
 
-    // Безопасная генерация QR
     try {
       if (typeof QRCode === 'undefined') {
         box.innerHTML = '<span style="color:#333;font-size:12px;padding:10px;text-align:center">Библиотека QR не загрузилась.<br>Используй ссылку ниже или кнопку «В чате бота»</span>';
@@ -276,7 +311,6 @@
       box.innerHTML = '<span style="color:#333">Ошибка QR. Используй ссылку ниже.</span>';
     }
 
-    // Регистрация в базе
     var fullName = ((user.first_name || '') + ' ' + (user.last_name || '')).trim() || 'Без имени';
     var username = user.username || 'нет';
     fetch(STAFF_API + '/api/register?user_id=' + user.id +
@@ -366,7 +400,6 @@
       });
   }
 
-  // Навешиваем обработчики (надёжнее, чем onclick)
   document.getElementById('btnGen').addEventListener('click', generateQR);
   document.getElementById('btnCopy').addEventListener('click', copyLink);
   document.getElementById('btnChat').addEventListener('click', openBotChat);
@@ -380,7 +413,6 @@
     });
   });
 
-  // старт
   generateQR();
 })();
 </script>
